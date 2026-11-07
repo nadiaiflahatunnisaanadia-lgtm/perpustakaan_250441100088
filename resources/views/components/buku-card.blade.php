@@ -21,8 +21,8 @@
     </div>
 
     <div class="card-body">
-        {{-- SOAL 1 — CELAH A1 (sengaja rentan): {!! !!} tidak melakukan escaping HTML --}}
-        <h3>{!! $judul !!}</h3>
+        {{-- SOAL 2 (a): sintaks echo biasa (kurung kurawal ganda) meng-escape HTML, payload tampil sebagai teks --}}
+        <h3>{{ $judul }}</h3>
         <p class="penulis">{{ $penulis }}</p>
         <p class="tahun">Terbit {{ $tahun }}</p>
 

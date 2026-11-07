@@ -206,8 +206,16 @@
             </form>
         </section>
 
+        @include('layouts.partials.flash')
+
         {{-- Pesan berhasil / gagal --}}
         <div id="pesan" role="alert" hidden></div>
+
+        {{-- SOAL 2 (c): penghapusan lewat form DELETE dengan token CSRF (action diisi saat tombol Hapus diklik) --}}
+        <form id="form-hapus" method="POST" action="{{ url('/buku') }}" hidden>
+            @csrf
+            @method('DELETE')
+        </form>
 
         {{-- Tabel buku (diisi lewat Fetch API) --}}
         <section class="panel">
@@ -241,9 +249,11 @@
 
     <script>
         const API_URL = @json(url('/api/buku'));
+        const BUKU_URL = @json(url('/buku'));
         const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 
         const form = document.getElementById('form-buku');
+        const formHapus = document.getElementById('form-hapus');
         const judulForm = document.getElementById('judul-form');
         const tombolSimpan = document.getElementById('tombol-simpan');
         const tombolBatal = document.getElementById('tombol-batal');
@@ -465,26 +475,10 @@
         }
 
 
-        async function hapusBuku(id) {
-            try {
-                const response = await fetch(API_URL + '/' + id, {
-                    method: 'DELETE',
-                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN },
-                    credentials: 'same-origin',
-                });
-
-                if (!response.ok) {
-                    throw new Error(await pesanDariRespons(response, 'menghapus buku'));
-                }
-
-                tampilPesan('Buku berhasil dihapus.', 'sukses');
-                await ambilBuku(halaman);
-
-                return true;
-            } catch (error) {
-                tampilPesan(pesanDariError(error, 'menghapus buku'), 'gagal');
-                return false;
-            }
+        // Menghapus buku lewat form DELETE yang memuat @csrf dan @method('DELETE')
+        function hapusBuku(id) {
+            formHapus.action = BUKU_URL + '/' + id;
+            formHapus.submit();
         }
 
 
@@ -570,12 +564,7 @@
                 return;
             }
 
-            const berhasil = await hapusBuku(id);
-
-            // kalau buku yang dihapus sedang diubah di formulir, formulir dikosongkan
-            if (berhasil && idEdit === id) {
-                modeTambah();
-            }
+            hapusBuku(id);
         });
 
         tombolSebelumnya.addEventListener('click', () => ambilBuku(halaman - 1));

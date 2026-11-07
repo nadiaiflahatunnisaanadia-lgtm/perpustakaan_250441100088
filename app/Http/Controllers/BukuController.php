@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Buku;
 use App\Models\Kategori;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -54,16 +55,28 @@ class BukuController extends Controller
     }
 
     /**
-     * SOAL 1 — CELAH A2 (sengaja rentan): SQL Injection.
-     * Nilai query string "judul" digabungkan langsung ke string SQL tanpa binding.
+     * Pencarian buku berdasarkan judul (JSON).
+     * SOAL 2 (b): nilai "judul" dikirim sebagai binding (tanda ?), bukan digabung ke string SQL,
+     * sehingga selalu diperlakukan sebagai data dan tidak bisa mengubah struktur query.
      */
     public function cari(Request $request): JsonResponse
     {
-        $judul = $request->query('judul');
+        $judul = (string) $request->query('judul', '');
 
-        $hasil = DB::select("SELECT * FROM bukus WHERE judul = '$judul'");
+        $hasil = DB::select('SELECT * FROM bukus WHERE judul = ?', [$judul]);
 
         return response()->json($hasil);
+    }
+
+    /**
+     * Hapus buku. SOAL 2 (c): hanya bisa lewat method DELETE (form dengan @csrf + @method('DELETE')),
+     * sehingga permintaan tanpa token CSRF ditolak 419 dan tautan GET tidak lagi menghapus data.
+     */
+    public function destroy(Buku $buku): RedirectResponse
+    {
+        $buku->delete();
+
+        return back()->with('sukses', 'Buku berhasil dihapus.');
     }
 
     private function bentukData(Buku $buku): array
