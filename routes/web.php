@@ -89,7 +89,7 @@ Route::middleware('auth')->group(function () {
     // SOAL 2 (b): pencarian buku memakai query dengan binding
     Route::get('/buku-cari', [BukuController::class, 'cari'])->name('buku.cari');
 
-    // A4: IDOR — tidak ada pemeriksaan pemilik pada peminjaman (ditutup pada Soal 4)
+    // SOAL 4: detail peminjaman — kepemilikan diperiksa lewat PeminjamanPolicy@view di controller
     Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])
         ->whereNumber('id')
         ->name('peminjaman.show');

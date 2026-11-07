@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Anggota;
 use App\Models\Buku;
 use App\Models\Kategori;
+use App\Models\Peminjaman;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -249,5 +250,55 @@ class KeamananTest extends TestCase
             ->assertDontSee('/buku/create', false)
             ->assertDontSee('/edit', false)
             ->assertDontSee('name="_method" value="DELETE"', false);
+    }
+
+    // ------------------------------------------------------------------ Soal 4 — Policy (IDOR)
+
+    private function buatPeminjaman(User $pemilik, Buku $buku): Peminjaman
+    {
+        return Peminjaman::create([
+            'anggota_id'     => $pemilik->anggota->id,
+            'buku_id'        => $buku->id,
+            'tanggal_pinjam' => now()->toDateString(),
+            'status'         => Peminjaman::DIPINJAM,
+        ]);
+    }
+
+    public function test_soal4_belum_login_dialihkan_ke_login(): void
+    {
+        $this->get('/peminjaman/1')->assertRedirect('/login');
+    }
+
+    public function test_soal4_siswa_membuka_peminjaman_miliknya_menerima_200(): void
+    {
+        $buku = $this->buatBuku('Buku Milik Siswa');
+        $pinjam = $this->buatPeminjaman($this->siswa, $buku);
+
+        $this->actingAs($this->siswa)->get("/peminjaman/{$pinjam->id}")
+            ->assertOk()
+            ->assertSee('Buku Milik Siswa');
+    }
+
+    public function test_soal4_siswa_membuka_peminjaman_siswa_lain_menerima_403(): void
+    {
+        $buku = $this->buatBuku('Buku Rahasia Siswa Lain');
+        $pinjam = $this->buatPeminjaman($this->siswaLain, $buku);
+
+        $this->actingAs($this->siswa)->get("/peminjaman/{$pinjam->id}")
+            ->assertForbidden()
+            ->assertDontSee('Buku Rahasia Siswa Lain');
+    }
+
+    public function test_soal4_petugas_dan_admin_membuka_peminjaman_siapa_pun_menerima_200(): void
+    {
+        $pinjam = $this->buatPeminjaman($this->siswaLain, $this->buatBuku('Buku Siswa Lain'));
+
+        $this->actingAs($this->petugas)->get("/peminjaman/{$pinjam->id}")->assertOk()->assertSee('Buku Siswa Lain');
+        $this->actingAs($this->admin)->get("/peminjaman/{$pinjam->id}")->assertOk()->assertSee('Buku Siswa Lain');
+    }
+
+    public function test_soal4_peminjaman_yang_tidak_ada_menerima_404(): void
+    {
+        $this->actingAs($this->petugas)->get('/peminjaman/999999')->assertNotFound();
     }
 }

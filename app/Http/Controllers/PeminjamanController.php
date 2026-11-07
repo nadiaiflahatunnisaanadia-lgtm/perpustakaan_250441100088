@@ -7,6 +7,7 @@ use App\Models\Buku;
 use App\Models\Peminjaman;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class PeminjamanController extends Controller
@@ -26,12 +27,15 @@ class PeminjamanController extends Controller
     }
 
     /**
-     * SOAL 1 — CELAH A4 (sengaja rentan): IDOR.
-     * Data diambil langsung dari {id} tanpa memeriksa siapa pemiliknya.
+     * Detail satu peminjaman.
+     * SOAL 4: akses diperiksa lewat PeminjamanPolicy@view — staf boleh melihat semua,
+     * siswa hanya miliknya sendiri; selain itu 403.
      */
     public function show($id): View
     {
         $peminjaman = Peminjaman::with(['anggota', 'buku.kategori', 'pemroses'])->findOrFail($id);
+
+        Gate::authorize('view', $peminjaman);
 
         return view('peminjaman.show', ['peminjaman' => $peminjaman]);
     }
