@@ -112,9 +112,3 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
         });
 });
-
-// SOAL 5 (a) — ROUTE SEMENTARA untuk menguji halaman error saat APP_DEBUG=false.
-// Buka /uji-error lalu SEGERA HAPUS route ini (lihat commit berikutnya).
-Route::get('/uji-error', function () {
-    throw new \RuntimeException('Uji halaman error (route sementara)');
-});
