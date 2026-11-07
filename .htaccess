@@ -1,0 +1,7 @@
+# SOAL 5 (b): lapisan cadangan bila web server salah diarahkan ke FOLDER PROYEK (bukan ke public/).
+# Document root yang benar tetap folder public/. Berkas tersembunyi (.env, .git, ...) tidak boleh dilayani.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes

@@ -8,8 +8,11 @@ use App\Models\Kategori;
 use App\Models\Peminjaman;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Database\Seeders\UserSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 /**
@@ -300,5 +303,56 @@ class KeamananTest extends TestCase
     public function test_soal4_peminjaman_yang_tidak_ada_menerima_404(): void
     {
         $this->actingAs($this->petugas)->get('/peminjaman/999999')->assertNotFound();
+    }
+
+    // ------------------------------------------------------------------ Soal 5 — Penguatan konfigurasi
+
+    public function test_soal5a_error_saat_debug_false_tidak_menampilkan_jejak_kode(): void
+    {
+        config(['app.debug' => false]);
+
+        // route sementara khusus pengujian (tidak ada di aplikasi sebenarnya)
+        Route::get('/uji-error-sementara', function () {
+            throw new \RuntimeException('rahasia-internal-250441100088');
+        });
+
+        $this->get('/uji-error-sementara')
+            ->assertStatus(500)
+            ->assertSee('Server Error')
+            ->assertDontSee('RuntimeException')
+            ->assertDontSee('rahasia-internal-250441100088')
+            ->assertDontSee('KeamananTest')
+            ->assertDontSee('vendor/laravel');
+    }
+
+    public function test_soal5b_berkas_env_tidak_dapat_dibuka_lewat_web(): void
+    {
+        $this->get('/.env')->assertNotFound();
+        $this->get('/.git/config')->assertNotFound();
+    }
+
+    public function test_soal5c_password_bawaan_admin_tidak_lagi_berlaku(): void
+    {
+        config(['app.admin_password' => 'KataSandiKuat250441100088']);
+        $this->seed(UserSeeder::class);
+
+        $this->post('/login', ['email' => 'admin@perpustakaan.test', 'password' => 'password'])
+            ->assertSessionHasErrors('email');
+        $this->assertGuest();
+
+        $this->post('/login', ['email' => 'admin@perpustakaan.test', 'password' => 'KataSandiKuat250441100088'])
+            ->assertRedirect(route('admin.dashboard', absolute: false));
+        $this->assertAuthenticated();
+    }
+
+    public function test_soal5c_tanpa_admin_password_di_env_seeder_membuat_password_acak(): void
+    {
+        config(['app.admin_password' => null]);
+        $this->seed(UserSeeder::class);
+
+        $admin = User::where('email', 'admin@perpustakaan.test')->firstOrFail();
+
+        $this->assertFalse(Hash::check('password', $admin->password));
+        $this->assertTrue($admin->hasRole('admin'));
     }
 }

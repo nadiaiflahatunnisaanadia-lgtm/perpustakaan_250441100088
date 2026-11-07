@@ -22,7 +22,7 @@ php artisan serve
 > jadi tidak perlu dipublish ulang. **Jangan** menjalankan `php artisan breeze:install` — itu akan
 > menimpa layout/CSS Lentera Aksara dan file auth yang sudah disesuaikan.
 
-### Akun contoh (password semuanya `password`)
+### Akun contoh (password `password`; **khusus admin sudah diganti di Modul 6**, lihat `README_MODUL6.md`)
 
 | Role    | Email                        |
 |---------|------------------------------|

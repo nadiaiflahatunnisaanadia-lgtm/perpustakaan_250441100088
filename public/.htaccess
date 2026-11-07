@@ -1,3 +1,8 @@
+# SOAL 5 (b): blokir akses ke berkas tersembunyi (.env, .git, .htpasswd, dst.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

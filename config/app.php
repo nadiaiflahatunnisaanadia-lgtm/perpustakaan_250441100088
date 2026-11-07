@@ -43,6 +43,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Password Akun Admin (seeder)
+    |--------------------------------------------------------------------------
+    |
+    | Dipakai UserSeeder untuk akun admin. Bila kosong, seeder membuat password
+    | acak dan menampilkannya di konsol. Jangan pernah memakai "password".
+    |
+    */
+
+    'admin_password' => env('ADMIN_PASSWORD'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |

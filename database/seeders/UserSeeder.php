@@ -8,23 +8,33 @@ use App\Models\Peminjaman;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
   
     public function run(): void
     {
+        // SOAL 5 (c): password admin TIDAK lagi "password". Diambil dari ADMIN_PASSWORD di .env;
+        // bila kosong dibuat acak (dan ditampilkan sekali di konsol).
+        $passwordAdmin = config('app.admin_password');
+
+        if (blank($passwordAdmin)) {
+            $passwordAdmin = Str::password(20, symbols: false);
+            $this->command?->warn("ADMIN_PASSWORD kosong. Password admin acak: {$passwordAdmin}");
+        }
+
         $akun = [
-            ['Admin Perpustakaan',   'admin@perpustakaan.test',   'admin'],
-            ['Petugas Perpustakaan', 'petugas@perpustakaan.test', 'petugas'],
-            ['Siswa Satu',           'siswa1@perpustakaan.test',  'siswa'],
-            ['Siswa Dua',            'siswa2@perpustakaan.test',  'siswa'],
+            ['Admin Perpustakaan',   'admin@perpustakaan.test',   'admin',   $passwordAdmin],
+            ['Petugas Perpustakaan', 'petugas@perpustakaan.test', 'petugas', 'password'],
+            ['Siswa Satu',           'siswa1@perpustakaan.test',  'siswa',   'password'],
+            ['Siswa Dua',            'siswa2@perpustakaan.test',  'siswa',   'password'],
         ];
 
-        foreach ($akun as [$nama, $email, $role]) {
+        foreach ($akun as [$nama, $email, $role, $password]) {
             $user = User::updateOrCreate(
                 ['email' => $email],
-                ['name' => $nama, 'password' => Hash::make('password')],
+                ['name' => $nama, 'password' => Hash::make($password)],
             );
             $user->syncRoles($role);
 
