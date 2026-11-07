@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Buku;
 use App\Models\Kategori;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -49,6 +51,19 @@ class BukuController extends Controller
         return view('buku.show', [
             'buku' => $item ? $this->bentukData($item) : null,
         ]);
+    }
+
+    /**
+     * SOAL 1 — CELAH A2 (sengaja rentan): SQL Injection.
+     * Nilai query string "judul" digabungkan langsung ke string SQL tanpa binding.
+     */
+    public function cari(Request $request): JsonResponse
+    {
+        $judul = $request->query('judul');
+
+        $hasil = DB::select("SELECT * FROM bukus WHERE judul = '$judul'");
+
+        return response()->json($hasil);
     }
 
     private function bentukData(Buku $buku): array

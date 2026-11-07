@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Api\BukuController as ApiBukuController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaporanController;
@@ -78,6 +79,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan', [LaporanController::class, 'index'])
         ->middleware('permission:lihat laporan perpustakaan')
         ->name('laporan.index');
+
+    /*
+    |----------------------------------------------------------------------
+    | SOAL 1 — CELAH SENGAJA (hanya untuk audit keamanan di lingkungan lokal)
+    |----------------------------------------------------------------------
+    */
+
+    // A2: SQL Injection — query dibangun dengan string concatenation
+    Route::get('/buku-cari', [BukuController::class, 'cari'])->name('buku.cari');
+
+    // A3: CSRF — aksi yang mengubah data lewat GET tanpa token CSRF
+    Route::get('/buku/{buku}/hapus', [ApiBukuController::class, 'destroy'])
+        ->whereNumber('buku')
+        ->name('buku.hapus');
+
+    // A4: IDOR — tidak ada pemeriksaan pemilik pada peminjaman
+    Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])
+        ->whereNumber('id')
+        ->name('peminjaman.show');
 
     Route::get('/profil', [ProfileController::class, 'edit'])
         ->middleware('permission:lihat profil sendiri')

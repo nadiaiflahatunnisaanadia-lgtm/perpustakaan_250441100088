@@ -25,6 +25,17 @@ class PeminjamanController extends Controller
         ]);
     }
 
+    /**
+     * SOAL 1 — CELAH A4 (sengaja rentan): IDOR.
+     * Data diambil langsung dari {id} tanpa memeriksa siapa pemiliknya.
+     */
+    public function show($id): View
+    {
+        $peminjaman = Peminjaman::with(['anggota', 'buku.kategori', 'pemroses'])->findOrFail($id);
+
+        return view('peminjaman.show', ['peminjaman' => $peminjaman]);
+    }
+
     public function create(): View
     {
         return view('peminjaman.create', [
