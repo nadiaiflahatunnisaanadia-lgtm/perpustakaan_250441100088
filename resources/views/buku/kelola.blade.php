@@ -162,7 +162,7 @@
                 <h1>Kelola data buku.</h1>
                 <p>
                     Tambah, ubah, dan hapus data buku. Halaman ini hanya bisa dibuka
-                    admin dan petugas (permission <em>kelola data buku</em>).
+                    admin dan petugas (Gate <em>kelola-buku</em>).
                 </p>
             </div>
         </div>

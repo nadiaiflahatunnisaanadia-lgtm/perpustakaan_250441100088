@@ -26,7 +26,7 @@
             <h2>Pintasan</h2>
             <div class="aksi-baris">
                 @can('kelola data pengguna') <a class="btn" href="{{ route('admin.users.index') }}">Kelola pengguna &amp; role</a> @endcan
-                @can('kelola data buku') <a class="btn" href="{{ route('buku.kelola') }}">Kelola buku</a> @endcan
+                @can('kelola-buku') <a class="btn" href="{{ route('buku.kelola') }}">Kelola buku</a> @endcan
                 @can('kelola peminjaman') <a class="btn" href="{{ route('peminjaman.index') }}">Peminjaman</a> @endcan
                 @can('kelola pengembalian') <a class="btn" href="{{ route('pengembalian.index') }}">Pengembalian</a> @endcan
                 @can('lihat laporan perpustakaan') <a class="btn" href="{{ route('laporan.index') }}">Laporan</a> @endcan

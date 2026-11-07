@@ -45,6 +45,11 @@
             @if (request()->hasAny(['cari', 'kategori']))
                 <a href="{{ route('buku.index') }}" class="btn btn-batal">Reset</a>
             @endif
+
+            {{-- SOAL 3: tombol Tambah hanya tampil bagi yang lolos Gate kelola-buku (admin & petugas) --}}
+            @can('kelola-buku')
+                <a href="{{ route('buku.create') }}" class="btn" style="margin-left: auto;">Tambah buku</a>
+            @endcan
         </form>
 
         <section class="daftar-buku">
@@ -63,6 +68,20 @@
                             @csrf
                             <button type="submit" class="btn btn-kecil">Ajukan peminjaman</button>
                         </form>
+                    @endcan
+
+                    {{-- SOAL 3: tombol Ubah & Hapus hanya tampil bagi yang lolos Gate kelola-buku --}}
+                    @can('kelola-buku')
+                        <div class="aksi-kelola">
+                            <a href="{{ route('buku.edit', $item->id) }}" class="btn btn-kecil">Ubah</a>
+
+                            <form method="POST" action="{{ route('buku.destroy', $item->id) }}"
+                                  onsubmit="return confirm('Yakin ingin menghapus buku ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-kecil btn-hapus">Hapus</button>
+                            </form>
+                        </div>
                     @endcan
                 </x-buku-card>
             @empty

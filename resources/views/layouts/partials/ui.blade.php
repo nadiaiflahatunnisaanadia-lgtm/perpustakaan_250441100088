@@ -94,6 +94,9 @@
     .aksi-kartu { margin-top: 14px; }
     .aksi-kartu .btn { width: 100%; text-align: center; }
 
+    .aksi-kelola { display: flex; gap: 8px; margin-top: 10px; }
+    .aksi-kelola form { margin: 0; }
+
     .paginasi { margin-top: 20px; display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
     .paginasi a, .paginasi span.cur {
         padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; text-decoration: none; color: var(--ink);

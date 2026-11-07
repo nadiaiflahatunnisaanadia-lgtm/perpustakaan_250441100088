@@ -20,8 +20,8 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('buku/{id}', [BukuController::class, 'show'])->name('api.buku.show');
     });
 
-    // Tambah / ubah / hapus buku: admin & petugas
-    Route::middleware('permission:kelola data buku')->group(function () {
+    // Tambah / ubah / hapus buku: dijaga Gate "kelola-buku" (admin & petugas) — Soal 3
+    Route::middleware('can:kelola-buku')->group(function () {
         Route::post('buku', [BukuController::class, 'store'])->name('api.buku.store');
         Route::match(['put', 'patch'], 'buku/{id}', [BukuController::class, 'update'])->name('api.buku.update');
         Route::delete('buku/{id}', [BukuController::class, 'destroy'])->name('api.buku.destroy');

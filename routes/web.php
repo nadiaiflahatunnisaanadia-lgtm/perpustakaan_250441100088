@@ -37,9 +37,16 @@ Route::middleware('auth')->group(function () {
     });
 
  
-    Route::get('/kelola/buku', [BukuController::class, 'kelola'])
-        ->middleware('permission:kelola data buku')
-        ->name('buku.kelola');
+    // SOAL 3: seluruh pengelolaan buku (halaman kelola, tambah, ubah, hapus) dijaga Gate "kelola-buku"
+    Route::middleware('can:kelola-buku')->group(function () {
+        Route::get('/kelola/buku', [BukuController::class, 'kelola'])->name('buku.kelola');
+
+        Route::get('/buku/create', [BukuController::class, 'create'])->name('buku.create');
+        Route::post('/buku', [BukuController::class, 'store'])->name('buku.store');
+        Route::get('/buku/{buku}/edit', [BukuController::class, 'edit'])->whereNumber('buku')->name('buku.edit');
+        Route::put('/buku/{buku}', [BukuController::class, 'update'])->whereNumber('buku')->name('buku.update');
+        Route::delete('/buku/{buku}', [BukuController::class, 'destroy'])->whereNumber('buku')->name('buku.destroy');
+    });
 
     Route::post('/buku/{buku}/ajukan', [PengajuanController::class, 'store'])
         ->middleware('permission:mengajukan peminjaman buku')
@@ -81,12 +88,6 @@ Route::middleware('auth')->group(function () {
 
     // SOAL 2 (b): pencarian buku memakai query dengan binding
     Route::get('/buku-cari', [BukuController::class, 'cari'])->name('buku.cari');
-
-    // SOAL 2 (c): penghapusan buku hanya lewat DELETE (route GET /buku/{buku}/hapus sudah dihapus)
-    Route::delete('/buku/{buku}', [BukuController::class, 'destroy'])
-        ->middleware('permission:kelola data buku')
-        ->whereNumber('buku')
-        ->name('buku.destroy');
 
     // A4: IDOR — tidak ada pemeriksaan pemilik pada peminjaman (ditutup pada Soal 4)
     Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])

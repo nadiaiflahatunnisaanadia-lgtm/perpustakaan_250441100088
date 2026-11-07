@@ -8,6 +8,7 @@ use App\Models\Kategori;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Tests\TestCase;
 
 /**
@@ -154,5 +155,99 @@ class KeamananTest extends TestCase
         $this->actingAs($this->siswa)->delete("/buku/{$buku->id}")->assertForbidden();
 
         $this->assertDatabaseHas('bukus', ['id' => $buku->id]);
+    }
+
+    // ------------------------------------------------------------------ Soal 3 — Gate kelola-buku
+
+    public function test_soal3_gate_kelola_buku_hanya_untuk_admin_dan_petugas(): void
+    {
+        $this->assertTrue(Gate::forUser($this->admin)->allows('kelola-buku'));
+        $this->assertTrue(Gate::forUser($this->petugas)->allows('kelola-buku'));
+        $this->assertFalse(Gate::forUser($this->siswa)->allows('kelola-buku'));
+    }
+
+    public function test_soal3_admin_dan_petugas_membuka_form_tambah_buku(): void
+    {
+        $this->actingAs($this->admin)->get('/buku/create')->assertOk();
+        $this->actingAs($this->petugas)->get('/buku/create')->assertOk();
+    }
+
+    public function test_soal3_siswa_membuka_buku_create_langsung_menerima_403(): void
+    {
+        $this->actingAs($this->siswa)->get('/buku/create')->assertForbidden();
+    }
+
+    public function test_soal3_belum_login_dialihkan_ke_login(): void
+    {
+        $this->get('/buku/create')->assertRedirect('/login');
+    }
+
+    public function test_soal3_siswa_ditolak_pada_semua_route_pengelolaan_buku(): void
+    {
+        $buku = $this->buatBuku();
+        $kategori = Kategori::firstOrFail();
+        $data = ['kategori_id' => $kategori->id, 'judul' => 'Judul Ilegal', 'penulis' => 'Penulis', 'tahun_terbit' => 2021];
+
+        $this->actingAs($this->siswa);
+        $this->get('/kelola/buku')->assertForbidden();
+        $this->get("/buku/{$buku->id}/edit")->assertForbidden();
+        $this->post('/buku', $data)->assertForbidden();
+        $this->put("/buku/{$buku->id}", $data)->assertForbidden();
+        $this->delete("/buku/{$buku->id}")->assertForbidden();
+        $this->postJson('/api/buku', $data)->assertForbidden();
+        $this->putJson("/api/buku/{$buku->id}", $data)->assertForbidden();
+        $this->deleteJson("/api/buku/{$buku->id}")->assertForbidden();
+
+        $this->assertDatabaseHas('bukus', ['id' => $buku->id, 'judul' => $buku->judul]);
+        $this->assertDatabaseMissing('bukus', ['judul' => 'Judul Ilegal']);
+    }
+
+    public function test_soal3_admin_dan_petugas_dapat_tambah_ubah_dan_hapus_buku(): void
+    {
+        $kategori = Kategori::create(['nama' => 'Novel']);
+
+        foreach ([$this->admin, $this->petugas] as $pengelola) {
+            $judul = 'Buku dari ' . $pengelola->id;
+
+            $this->actingAs($pengelola)
+                ->post('/buku', ['kategori_id' => $kategori->id, 'judul' => $judul, 'penulis' => 'Penulis', 'tahun_terbit' => 2022])
+                ->assertRedirect(route('buku.index'));
+
+            $buku = Buku::where('judul', $judul)->firstOrFail();
+
+            $this->get("/buku/{$buku->id}/edit")->assertOk()->assertSee($judul);
+
+            $this->put("/buku/{$buku->id}", ['kategori_id' => $kategori->id, 'judul' => $judul . ' (ubah)', 'penulis' => 'Penulis', 'tahun_terbit' => 2023])
+                ->assertRedirect(route('buku.index'));
+            $this->assertDatabaseHas('bukus', ['id' => $buku->id, 'judul' => $judul . ' (ubah)']);
+
+            $this->delete("/buku/{$buku->id}")->assertRedirect();
+            $this->assertDatabaseMissing('bukus', ['id' => $buku->id]);
+        }
+    }
+
+    public function test_soal3_tombol_kelola_tampil_untuk_petugas_dan_admin(): void
+    {
+        $buku = $this->buatBuku();
+
+        foreach ([$this->petugas, $this->admin] as $pengelola) {
+            $this->actingAs($pengelola)->get('/buku')
+                ->assertOk()
+                ->assertSee('Tambah buku')
+                ->assertSee("/buku/{$buku->id}/edit", false)
+                ->assertSee('name="_method" value="DELETE"', false);
+        }
+    }
+
+    public function test_soal3_tombol_kelola_tidak_tampil_untuk_siswa(): void
+    {
+        $this->buatBuku();
+
+        $this->actingAs($this->siswa)->get('/buku')
+            ->assertOk()
+            ->assertDontSee('Tambah buku')
+            ->assertDontSee('/buku/create', false)
+            ->assertDontSee('/edit', false)
+            ->assertDontSee('name="_method" value="DELETE"', false);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreBukuRequest;
+use App\Http\Requests\UpdateBukuRequest;
 use App\Models\Buku;
 use App\Models\Kategori;
 use Illuminate\Http\JsonResponse;
@@ -37,12 +39,44 @@ class BukuController extends Controller
         ]);
     }
 
-    /** Halaman pengelolaan data buku (tambah / ubah / hapus lewat API) — permission "kelola data buku". */
+    /** Halaman pengelolaan data buku (tambah / ubah / hapus) — dijaga Gate "kelola-buku". */
     public function kelola(): View
     {
         return view('buku.kelola', [
             'kategori' => Kategori::orderBy('nama')->get(),
         ]);
+    }
+
+    /** Form tambah buku — Gate "kelola-buku" (dipasang pada route). */
+    public function create(): View
+    {
+        return view('buku.form', [
+            'buku'     => null,
+            'kategori' => Kategori::orderBy('nama')->get(),
+        ]);
+    }
+
+    public function store(StoreBukuRequest $request): RedirectResponse
+    {
+        Buku::create($request->validated());
+
+        return redirect()->route('buku.index')->with('sukses', 'Buku berhasil ditambahkan.');
+    }
+
+    /** Form ubah buku — Gate "kelola-buku" (dipasang pada route). */
+    public function edit(Buku $buku): View
+    {
+        return view('buku.form', [
+            'buku'     => $buku,
+            'kategori' => Kategori::orderBy('nama')->get(),
+        ]);
+    }
+
+    public function update(UpdateBukuRequest $request, Buku $buku): RedirectResponse
+    {
+        $buku->update($request->validated());
+
+        return redirect()->route('buku.index')->with('sukses', 'Buku berhasil diperbarui.');
     }
 
     public function show($id)
