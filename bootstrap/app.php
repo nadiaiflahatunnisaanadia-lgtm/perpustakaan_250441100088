@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
 
+        // Vercel berada di belakang proxy/CDN: percayai header X-Forwarded-* agar URL, redirect,
+        // dan cookie sesi memakai https dengan benar.
+        $middleware->trustProxies(at: '*');
+
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()->rutePendaratan());
     })
     ->withExceptions(function (Exceptions $exceptions): void {
