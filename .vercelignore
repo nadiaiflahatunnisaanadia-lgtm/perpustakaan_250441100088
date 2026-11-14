@@ -1,0 +1,26 @@
+# Rahasia: jangan pernah diunggah ke Vercel (nilainya diisi lewat Environment Variables)
+.env
+.env.*
+!.env.example
+
+# Folder git dan dependensi (Vercel menjalankan composer install sendiri)
+.git
+.gitignore
+.gitattributes
+.editorconfig
+node_modules
+vendor
+
+# Berkas pengujian dan pengembangan
+tests
+phpunit.xml
+.phpunit.result.cache
+CLAUDE.md
+AGENTS.md
+*.md
+
+# Data runtime lokal
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
