@@ -5,7 +5,7 @@
 @section('content')
     <div class="container auth-wrap">
         <div class="auth-card">
-            <h1>Masuk</h1>
+            <h1>Masuk 250441100088</h1>
             <p>Masuk dengan akunmu untuk melihat koleksi dan mengajukan peminjaman.</p>
 
             @include('layouts.partials.flash')
