@@ -26,11 +26,7 @@ class PeminjamanController extends Controller
         ]);
     }
 
-    /**
-     * Detail satu peminjaman.
-     * SOAL 4: akses diperiksa lewat PeminjamanPolicy@view — staf boleh melihat semua,
-     * siswa hanya miliknya sendiri; selain itu 403.
-     */
+  
     public function show($id): View
     {
         $peminjaman = Peminjaman::with(['anggota', 'buku.kategori', 'pemroses'])->findOrFail($id);

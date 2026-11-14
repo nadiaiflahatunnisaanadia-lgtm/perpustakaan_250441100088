@@ -15,10 +15,7 @@ use Illuminate\View\View;
 
 class BukuController extends Controller
 {
-    /**
-     * Katalog buku (hanya baca) untuk semua role yang punya permission
-     * "lihat daftar buku". Halaman pengelolaan ada di kelola().
-     */
+    
     public function index(Request $request): View
     {
         $buku = Buku::with('kategori')
@@ -39,7 +36,7 @@ class BukuController extends Controller
         ]);
     }
 
-    /** Halaman pengelolaan data buku (tambah / ubah / hapus) — dijaga Gate "kelola-buku". */
+    
     public function kelola(): View
     {
         return view('buku.kelola', [
@@ -47,7 +44,7 @@ class BukuController extends Controller
         ]);
     }
 
-    /** Form tambah buku — Gate "kelola-buku" (dipasang pada route). */
+  
     public function create(): View
     {
         return view('buku.form', [
@@ -63,7 +60,7 @@ class BukuController extends Controller
         return redirect()->route('buku.index')->with('sukses', 'Buku berhasil ditambahkan.');
     }
 
-    /** Form ubah buku — Gate "kelola-buku" (dipasang pada route). */
+   
     public function edit(Buku $buku): View
     {
         return view('buku.form', [
@@ -88,11 +85,7 @@ class BukuController extends Controller
         ]);
     }
 
-    /**
-     * Pencarian buku berdasarkan judul (JSON).
-     * SOAL 2 (b): nilai "judul" dikirim sebagai binding (tanda ?), bukan digabung ke string SQL,
-     * sehingga selalu diperlakukan sebagai data dan tidak bisa mengubah struktur query.
-     */
+   
     public function cari(Request $request): JsonResponse
     {
         $judul = (string) $request->query('judul', '');
@@ -102,10 +95,7 @@ class BukuController extends Controller
         return response()->json($hasil);
     }
 
-    /**
-     * Hapus buku. SOAL 2 (c): hanya bisa lewat method DELETE (form dengan @csrf + @method('DELETE')),
-     * sehingga permintaan tanpa token CSRF ditolak 419 dan tautan GET tidak lagi menghapus data.
-     */
+    
     public function destroy(Buku $buku): RedirectResponse
     {
         $buku->delete();

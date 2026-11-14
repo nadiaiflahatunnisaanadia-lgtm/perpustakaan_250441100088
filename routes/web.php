@@ -11,14 +11,11 @@ use App\Http\Controllers\PengembalianController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::get('/', function () {
     return view('home');
 })->name('home');
 
-
 require __DIR__.'/auth.php';
-
 
 Route::middleware('auth')->group(function () {
 
@@ -30,14 +27,12 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:akses dashboard petugas')
         ->name('petugas.dashboard');
 
-
     Route::middleware('permission:lihat daftar buku')->group(function () {
         Route::get('/buku', [BukuController::class, 'index'])->name('buku.index');
         Route::get('/buku/{id}', [BukuController::class, 'show'])->whereNumber('id')->name('buku.show');
     });
 
- 
-    // SOAL 3: seluruh pengelolaan buku (halaman kelola, tambah, ubah, hapus) dijaga Gate "kelola-buku"
+
     Route::middleware('can:kelola-buku')->group(function () {
         Route::get('/kelola/buku', [BukuController::class, 'kelola'])->name('buku.kelola');
 
@@ -62,7 +57,7 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('anggota')
         ->name('riwayat.show');
 
-   
+
     Route::middleware('permission:kelola peminjaman')->group(function () {
         Route::get('/kelola/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
         Route::get('/kelola/peminjaman/tambah', [PeminjamanController::class, 'create'])->name('peminjaman.create');
@@ -86,10 +81,8 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:lihat laporan perpustakaan')
         ->name('laporan.index');
 
-    // SOAL 2 (b): pencarian buku memakai query dengan binding
     Route::get('/buku-cari', [BukuController::class, 'cari'])->name('buku.cari');
 
-    // SOAL 4: detail peminjaman — kepemilikan diperiksa lewat PeminjamanPolicy@view di controller
     Route::get('/peminjaman/{id}', [PeminjamanController::class, 'show'])
         ->whereNumber('id')
         ->name('peminjaman.show');
